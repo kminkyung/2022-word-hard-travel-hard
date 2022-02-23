@@ -10,6 +10,10 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
+    "eslint-plugin-react": "^7.28.0",
     "expo": "~44.0.0",
     "expo-status-bar": "~1.2.0",
     "react": "17.0.1",
@@ -23,5 +27,8 @@
     "@types/react-native": "~0.64.12",
     "typescript": "~4.3.5"
   },
-  "private": true
+  "private": true,
+  "repository": "https://github.com/kminkyung/2022-word-hard-travel-hard.git",
+  "author": "Minkyung Kim <52304091+kminkyung@users.noreply.github.com>",
+  "license": "MIT"
 }
