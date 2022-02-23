@@ -1,53 +1,65 @@
+import React from 'react';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
-import {theme} from "./colors";
-import {useState} from "react";
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import styles from './styles';
+import { theme } from './colors';
 
-export default function App() {
-  const [working, setWorking] = useState<boolean>(true);
-  const [text, setText] = useState<string>('');
-  const travel = () => setWorking(false);
-  const work = () => setWorking(true);
-  const onChangeText = (payload: string) => setText(payload);
-
-  return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={work}>
-          <Text style={{...styles.btnText, color: working ? 'white' : theme.grey}}>Work</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={travel}>
-          <Text style={{...styles.btnText, color: working ? theme.grey : 'white'}}>Travel</Text>
-        </TouchableOpacity>
-      </View>
-      <TextInput onChangeText={onChangeText} style={styles.input} placeholder={working ? 'Add a To Do' : 'Where do you want to go?'}/>
-    </View>
-  );
+interface ITodo {
+  text: string;
+  work: boolean;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.bg,
-    paddingHorizontal: 20,
-  },
-  header: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    marginTop: 100,
-  },
-  btnText: {
-    fontSize: 38,
-    fontWeight: '600',
-    color: 'white'
-  },
-  input: {
-    backgroundColor: 'white',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    marginTop: 20,
-    fontSize: 18
-  }
-});
+interface ITodos {
+  [now: number]: ITodo;
+}
+
+export default function App() {
+	const [working, setWorking] = useState<boolean>(true);
+	const [text, setText] = useState<string>('');
+	const [todos, setTodos] = useState<ITodos>({});
+
+	const travel = () => setWorking(false);
+	const work = () => setWorking(true);
+	const onChangeText = (payload: string) => setText(payload);
+	const addTodo = () => {
+		if (!text.length) {
+			return;
+		}
+
+		const newTodos = {
+			...todos,
+			[Date.now()]: {text, work: working}
+		};
+		setTodos(newTodos);
+		setText('');
+	};
+
+	return (
+		<View style={styles.container}>
+			<StatusBar style="auto" />
+			<View style={styles.header}>
+				<TouchableOpacity onPress={work}>
+					<Text style={{...styles.btnText, color: working ? 'white' : theme.grey}}>Work</Text>
+				</TouchableOpacity>
+				<TouchableOpacity onPress={travel}>
+					<Text style={{...styles.btnText, color: working ? theme.grey : 'white'}}>Travel</Text>
+				</TouchableOpacity>
+			</View>
+			<TextInput
+				onChangeText={onChangeText}
+				style={styles.input}
+				placeholder={working ? 'Add a To Do' : 'Where do you want to go?'}
+				value={text}
+				onSubmitEditing={addTodo}
+				returnKeyType='done'
+			/>
+			<ScrollView>
+				{Object.keys(todos).map((time) => <View key={time} style={styles.todo}>
+					<Text style={styles.todoText}>{todos[+time].text}</Text>
+				</View>)}
+			</ScrollView>
+		</View>
+	);
+}
+
