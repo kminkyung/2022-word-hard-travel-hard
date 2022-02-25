@@ -7,7 +7,7 @@ import { theme } from './colors';
 
 interface ITodo {
   text: string;
-  work: boolean;
+  working: boolean;
 }
 
 interface ITodos {
@@ -29,7 +29,7 @@ export default function App() {
 
 		const newTodos = {
 			...todos,
-			[Date.now()]: {text, work: working}
+			[Date.now()]: {text, working}
 		};
 		setTodos(newTodos);
 		setText('');
@@ -55,9 +55,13 @@ export default function App() {
 				returnKeyType='done'
 			/>
 			<ScrollView>
-				{Object.keys(todos).map((time) => <View key={time} style={styles.todo}>
-					<Text style={styles.todoText}>{todos[+time].text}</Text>
-				</View>)}
+				{Object.keys(todos).map((key) =>
+					todos[+key].working === working ? (
+						<View key={key} style={styles.todo}>
+							<Text style={styles.todoText}>{todos[+key].text}</Text>
+						</View>
+					) : null
+				)}
 			</ScrollView>
 		</View>
 	);
