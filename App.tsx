@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './styles';
 import { theme } from './colors';
 
@@ -14,6 +15,8 @@ interface ITodos {
   [now: number]: ITodo;
 }
 
+const STORAGE_KEY = '@todos';
+
 export default function App() {
 	const [working, setWorking] = useState<boolean>(true);
 	const [text, setText] = useState<string>('');
@@ -22,7 +25,23 @@ export default function App() {
 	const travel = () => setWorking(false);
 	const work = () => setWorking(true);
 	const onChangeText = (payload: string) => setText(payload);
-	const addTodo = () => {
+	const saveTodos = async (toSave: ITodos) => {
+		try {
+			await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
+	const loadTodos = async () => {
+		const todos = await AsyncStorage.getItem(STORAGE_KEY);
+		console.log('todos', todos);
+		if (todos) {
+			setTodos(JSON.parse(todos));
+		}
+	};
+
+	const addTodo = async () => {
 		if (!text.length) {
 			return;
 		}
@@ -32,8 +51,13 @@ export default function App() {
 			[Date.now()]: {text, working}
 		};
 		setTodos(newTodos);
+		await saveTodos(newTodos);
 		setText('');
 	};
+
+	useEffect(() => {
+		loadTodos();
+	}, []);
 
 	return (
 		<View style={styles.container}>
