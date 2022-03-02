@@ -1,8 +1,9 @@
 import React, {useEffect} from 'react';
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { Text, View, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AntDesign } from '@expo/vector-icons';
 import styles from './styles';
 import { theme } from './colors';
 
@@ -12,7 +13,7 @@ interface ITodo {
 }
 
 interface ITodos {
-  [now: number]: ITodo;
+  [now: string]: ITodo;
 }
 
 const STORAGE_KEY = '@todos';
@@ -34,11 +35,30 @@ export default function App() {
 	};
 
 	const loadTodos = async () => {
-		const todos = await AsyncStorage.getItem(STORAGE_KEY);
-		console.log('todos', todos);
-		if (todos) {
-			setTodos(JSON.parse(todos));
+		try {
+			const todos = await AsyncStorage.getItem(STORAGE_KEY);
+			if (todos) {
+				setTodos(JSON.parse(todos));
+			}
+		} catch (e) {
+			console.error(e);
 		}
+	};
+
+	const deleteTodo = (key: keyof ITodos) => {
+		Alert.alert('Delete To Do', 'Are you sure?', [
+			{ text: 'Cancel', style: 'cancel' },
+			{
+				text: 'I\'m sure',
+				style: 'destructive',
+				onPress: async () => {
+					const newTodos = { ...todos };
+					delete newTodos[key];
+					await saveTodos(newTodos);
+					setTodos(newTodos);
+				},
+			},
+		]);
 	};
 
 	const addTodo = async () => {
@@ -48,7 +68,7 @@ export default function App() {
 
 		const newTodos = {
 			...todos,
-			[Date.now()]: {text, working}
+			[String(Date.now())]: {text, working}
 		};
 		setTodos(newTodos);
 		await saveTodos(newTodos);
@@ -80,9 +100,12 @@ export default function App() {
 			/>
 			<ScrollView>
 				{Object.keys(todos).map((key) =>
-					todos[+key].working === working ? (
+					todos[key].working === working ? (
 						<View key={key} style={styles.todo}>
-							<Text style={styles.todoText}>{todos[+key].text}</Text>
+							<Text style={styles.todoText}>{todos[key].text}</Text>
+							<TouchableOpacity onPress={() => deleteTodo(key)}>
+								<AntDesign name='closecircle' size={20} color={theme.grey} />
+							</TouchableOpacity>
 						</View>
 					) : null
 				)}
